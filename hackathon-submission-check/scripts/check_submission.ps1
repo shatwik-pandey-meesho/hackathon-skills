@@ -1,12 +1,13 @@
 param(
   [string]$Image = "hackathon-app:final",
-  [int]$Port = $(if ($env:PORT) { [int]$env:PORT } else { 8080 }),
+  [int]$FrontendPort = $(if ($env:FRONTEND_PORT) { [int]$env:FRONTEND_PORT } else { 9080 }),
+  [int]$BackendPort = $(if ($env:BACKEND_PORT) { [int]$env:BACKEND_PORT } else { 8090 }),
   [switch]$Help
 )
 
 if ($Help) {
   @"
-Usage: .\check_submission.ps1 [-Image hackathon-app:final] [-Port 8080]
+Usage: .\check_submission.ps1 [-Image hackathon-app:final] [-FrontendPort 9080] [-BackendPort 8090]
 
 Builds and smoke-tests the final single image, checks GitHub remote status,
 and scans committed files for obvious secrets.
@@ -48,6 +49,18 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
   if ($failed) { exit 1 }
 }
 
+function Test-PortAvailable {
+  param([int]$Port, [string]$Label)
+  $connection = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue
+  if ($connection) {
+    Fail "$Label port $Port is already being used by another program. Close that program or move it to another port, then retry."
+  }
+}
+
+Test-PortAvailable -Port $FrontendPort -Label "Frontend"
+Test-PortAvailable -Port $BackendPort -Label "Backend"
+if ($failed) { exit 1 }
+
 if (Test-Path "Dockerfile") {
   Write-Host "Building image $Image"
   docker build -t $Image .
@@ -56,30 +69,29 @@ if (Test-Path "Dockerfile") {
 
 $container = "hackathon-final-check-$([System.Guid]::NewGuid().ToString('N').Substring(0,8))"
 try {
-  docker run -d --name $container -p "${Port}:8080" $Image | Out-Null
+  docker run -d --name $container -p "${FrontendPort}:9080" -p "${BackendPort}:8090" $Image | Out-Null
   if ($LASTEXITCODE -eq 0) { Pass "container starts" } else { Fail "container failed to start"; exit 1 }
 
   $ready = $false
   for ($i = 0; $i -lt 45; $i++) {
     try {
-      curl.exe -fsS "http://localhost:$Port/health" | Out-Null
+      curl.exe -fsS "http://localhost:$BackendPort/health" | Out-Null
       Pass "health endpoint responds"
-      $ready = $true
-      break
-    } catch {
       try {
-        curl.exe -fsS "http://localhost:$Port/" | Out-Null
-        Pass "root page responds"
+        curl.exe -fsS "http://localhost:$FrontendPort/" | Out-Null
+        Pass "frontend responds"
         $ready = $true
         break
       } catch {
         Start-Sleep -Seconds 2
       }
+    } catch {
+      Start-Sleep -Seconds 2
     }
   }
 
   if (-not $ready) {
-    Fail "app did not respond on http://localhost:$Port"
+    Fail "app did not respond on frontend http://localhost:$FrontendPort and backend http://localhost:$BackendPort/health"
     docker logs --tail=100 $container
   }
 } finally {

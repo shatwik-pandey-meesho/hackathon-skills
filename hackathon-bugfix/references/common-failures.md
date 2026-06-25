@@ -31,7 +31,7 @@
 - Check entrypoint logs.
 - Check SQLite database initialization path and file permissions.
 - Check app process is foregrounded or supervised.
-- Check port `8080` is exposed and used.
+- Check frontend port `9080` and backend port `8090` are exposed and not already used by another program.
 
 ## GCP Push Fails
 

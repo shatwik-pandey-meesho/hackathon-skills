@@ -9,6 +9,13 @@ Allowed stack:
 - SQLite database
 - One final Docker image for judging
 
+Required local ports:
+
+- Frontend React app: `9080`
+- Backend Node.js or Go API: `8090`
+
+Claude or another agent should handle these ports during setup. If either port is already used by another program, that program must be closed or moved before the prototype can run correctly.
+
 ## Skills
 
 - `hackathon-bootstrap`: set up tools and create/repair the starter app.

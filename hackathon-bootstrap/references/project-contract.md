@@ -14,11 +14,16 @@ Use this contract when creating or repairing a participant project.
 
 ## Runtime Contract
 
-- Container listens on port `8080`.
-- Root path `/` serves the React app.
-- `/health` returns a simple successful response after backend and SQLite are ready.
+- Frontend listens on port `9080`.
+- Backend listens on port `8090`.
+- Frontend root path `/` serves the React app at `http://localhost:9080`.
+- Backend `/health` returns a simple successful response at `http://localhost:8090/health` after SQLite is ready.
 - Backend reads and writes a local SQLite file, normally `data/hackathon.db` or `app.db`.
 - Database path defaults to `data/hackathon.db`.
+
+## Port Conflicts
+
+Claude or another agent should configure these ports automatically. If `9080` or `8090` is already used by another local program, tell the participant to close that program or change its port before retrying.
 - Credentials are local-only defaults unless the organizer supplies registry/runtime secrets.
 
 ## Single Image Rule

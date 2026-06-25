@@ -37,11 +37,12 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
   }
 }
 
-Capture "port-8080" { Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue }
+Capture "port-9080-frontend" { Get-NetTCPConnection -LocalPort 9080 -ErrorAction SilentlyContinue }
+Capture "port-8090-backend" { Get-NetTCPConnection -LocalPort 8090 -ErrorAction SilentlyContinue }
 
 if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
-  Capture "health-localhost-8080" { curl.exe -fsS http://localhost:8080/health }
-  Capture "root-localhost-8080" { curl.exe -I http://localhost:8080/ }
+  Capture "backend-health-localhost-8090" { curl.exe -fsS http://localhost:8090/health }
+  Capture "frontend-root-localhost-9080" { curl.exe -I http://localhost:9080/ }
 }
 
 Write-Host "Diagnostics collected. Read the files in $OutDir."

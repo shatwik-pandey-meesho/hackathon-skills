@@ -40,12 +40,13 @@ if command -v docker >/dev/null 2>&1; then
 fi
 
 if command -v lsof >/dev/null 2>&1; then
-  run_capture "port-8080" lsof -i :8080
+  run_capture "port-9080-frontend" lsof -i :9080
+  run_capture "port-8090-backend" lsof -i :8090
 fi
 
 if command -v curl >/dev/null 2>&1; then
-  run_capture "health-localhost-8080" curl -fsS http://localhost:8080/health
-  run_capture "root-localhost-8080" curl -I http://localhost:8080/
+  run_capture "backend-health-localhost-8090" curl -fsS http://localhost:8090/health
+  run_capture "frontend-root-localhost-9080" curl -I http://localhost:9080/
 fi
 
 echo "Diagnostics collected. Read the files in $OUT."

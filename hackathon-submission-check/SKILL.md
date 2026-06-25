@@ -25,8 +25,8 @@ Check the complete judging path end to end. The output should be a clear pass/fa
 
 - One Docker image builds.
 - The image starts with `docker run`.
-- A browser can load the app.
-- Backend health or API responds.
+- A browser can load the frontend on `http://localhost:9080`.
+- Backend health or API responds on `http://localhost:8090`.
 - SQLite initializes.
 - GitHub repo is reachable.
 - Final image URL is known or ready to push.

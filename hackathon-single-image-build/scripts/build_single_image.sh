@@ -2,7 +2,8 @@
 set -euo pipefail
 
 IMAGE="${1:-hackathon-app:final}"
-PORT="${PORT:-8080}"
+FRONTEND_PORT="${FRONTEND_PORT:-9080}"
+BACKEND_PORT="${BACKEND_PORT:-8090}"
 CONTAINER="hackathon-smoke-$RANDOM"
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
@@ -11,7 +12,8 @@ Usage: build_single_image.sh [image:tag]
 
 Builds the final single Docker image and smoke-tests it.
 Environment:
-  PORT=8080
+  FRONTEND_PORT=9080
+  BACKEND_PORT=8090
 USAGE
   exit 0
 fi
@@ -26,6 +28,19 @@ if [[ ! -f Dockerfile ]]; then
   exit 1
 fi
 
+check_port_available() {
+  local port="$1"
+  local label="$2"
+  if command -v lsof >/dev/null 2>&1 && lsof -i ":$port" >/dev/null 2>&1; then
+    echo "$label port $port is already being used by another program."
+    echo "Close that program or move it to another port, then retry."
+    exit 1
+  fi
+}
+
+check_port_available "$FRONTEND_PORT" "Frontend"
+check_port_available "$BACKEND_PORT" "Backend"
+
 echo "Building $IMAGE"
 docker build -t "$IMAGE" .
 
@@ -35,20 +50,16 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Starting smoke test container"
-docker run -d --name "$CONTAINER" -p "$PORT:8080" "$IMAGE" >/dev/null
+docker run -d --name "$CONTAINER" -p "$FRONTEND_PORT:9080" -p "$BACKEND_PORT:8090" "$IMAGE" >/dev/null
 
-echo "Waiting for app on http://localhost:$PORT"
+echo "Waiting for backend on http://localhost:$BACKEND_PORT/health and frontend on http://localhost:$FRONTEND_PORT"
 for _ in $(seq 1 45); do
-  if command -v curl >/dev/null 2>&1 && curl -fsS "http://localhost:$PORT/health" >/dev/null 2>&1; then
-    echo "Health check passed."
+  if command -v curl >/dev/null 2>&1 \
+    && curl -fsS "http://localhost:$BACKEND_PORT/health" >/dev/null 2>&1 \
+    && curl -fsS "http://localhost:$FRONTEND_PORT/" >/dev/null 2>&1; then
+    echo "Frontend and backend checks passed."
     echo "Image ready: $IMAGE"
-    echo "Run command: docker run --rm -p 8080:8080 $IMAGE"
-    exit 0
-  fi
-  if command -v curl >/dev/null 2>&1 && curl -fsS "http://localhost:$PORT/" >/dev/null 2>&1; then
-    echo "Root page responded."
-    echo "Image ready: $IMAGE"
-    echo "Run command: docker run --rm -p 8080:8080 $IMAGE"
+    echo "Run command: docker run --rm -p 9080:9080 -p 8090:8090 $IMAGE"
     exit 0
   fi
   sleep 2

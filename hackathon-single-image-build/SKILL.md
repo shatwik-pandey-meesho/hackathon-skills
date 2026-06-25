@@ -21,7 +21,8 @@ Package the whole project into one runnable image for judges. The goal is not pr
 ## Required Behavior
 
 - One image is enough to run the project.
-- The app listens on container port `8080` unless the project already documents another judge-approved port.
+- The frontend listens on container port `9080`.
+- The backend listens on container port `8090`.
 - SQLite data may be ephemeral for judging unless the rules require persistent volume support.
 - The image must not require local source files after build.
 - Do not rely on Docker Compose for final judging unless the organizer explicitly permits it.

@@ -31,7 +31,7 @@ Create repositories only when organizers permit it.
 After the image is pushed, judges can deploy it to a Swarm service with a command like:
 
 ```text
-docker service create --name TEAM_SERVICE --publish 8080:8080 FINAL_IMAGE_URL
+docker service create --name TEAM_SERVICE --publish 9080:9080 --publish 8090:8090 FINAL_IMAGE_URL
 ```
 
 For an existing service:

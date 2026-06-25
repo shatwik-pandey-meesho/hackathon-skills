@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" || $# -lt 2 ]]; then
   cat <<'USAGE'
-Usage: print_swarm_deploy_command.sh FINAL_IMAGE_URL SERVICE_NAME [HOST_PORT]
+Usage: print_swarm_deploy_command.sh FINAL_IMAGE_URL SERVICE_NAME [FRONTEND_HOST_PORT] [BACKEND_HOST_PORT]
 
 Prints Docker Swarm commands for judges. It does not execute them.
 USAGE
@@ -12,11 +12,12 @@ fi
 
 IMAGE_URL="$1"
 SERVICE_NAME="$2"
-HOST_PORT="${3:-8080}"
+FRONTEND_HOST_PORT="${3:-9080}"
+BACKEND_HOST_PORT="${4:-8090}"
 
 cat <<EOF
 Create a new Swarm service:
-docker service create --name $SERVICE_NAME --publish $HOST_PORT:8080 $IMAGE_URL
+docker service create --name $SERVICE_NAME --publish $FRONTEND_HOST_PORT:9080 --publish $BACKEND_HOST_PORT:8090 $IMAGE_URL
 
 Update an existing Swarm service:
 docker service update --image $IMAGE_URL $SERVICE_NAME

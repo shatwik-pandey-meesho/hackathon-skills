@@ -9,8 +9,9 @@ The final image must include everything judges need to start the project.
 - SQLite runtime support installed in the image only if the backend needs the `sqlite3` CLI at runtime.
 - Database initialization from `db/init.sql` or equivalent.
 - Startup script that creates the SQLite database file before starting the app.
-- App listens on port `8080`.
-- `/health` succeeds after startup.
+- Frontend listens on port `9080`.
+- Backend listens on port `8090`.
+- Backend `/health` succeeds after startup.
 
 ## Recommended Runtime Pattern
 

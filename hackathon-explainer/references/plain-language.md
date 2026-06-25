@@ -14,7 +14,7 @@ Use these translations for non-technical participants.
 Prefer:
 
 ```text
-Your app is ready to open here: http://localhost:8080
+Your app is ready to open here: http://localhost:9080
 ```
 
 Avoid:

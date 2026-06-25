@@ -46,6 +46,16 @@ jobs:
             exit 1
           fi
 
+      - name: Ensure old single-port config was removed
+        shell: bash
+        run: |
+          set -euo pipefail
+          pattern='[8]080'
+          if find . -path ./.git -prune -o -type f -print0 | xargs -0 grep -InE "$pattern"; then
+            echo "Old single-port references found"
+            exit 1
+          fi
+
   windows:
     name: Windows PowerShell scripts
     runs-on: windows-latest

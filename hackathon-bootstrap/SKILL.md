@@ -28,8 +28,15 @@ Do not introduce Next.js, Python, Java, MongoDB, Postgres, Redis, Firebase, Supa
 4. Make the first screen usable immediately: a simple app title, one example form, one list view, and one health/status endpoint.
 5. Add local commands that work without explaining internals:
    - `docker build -t hackathon-app:local .`
-   - `docker run --rm -p 8080:8080 hackathon-app:local`
+   - `docker run --rm -p 9080:9080 -p 8090:8090 hackathon-app:local`
 6. Verify the app starts before telling the participant it is ready.
+
+## Required Ports
+
+- Frontend React app: `9080`
+- Backend Node.js or Go API: `8090`
+
+If either port is busy, explain that another program is already using the required door and it must be closed before the app can run.
 
 ## Participant Language
 
