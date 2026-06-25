@@ -1,6 +1,6 @@
 ---
 name: hackathon-github
-description: "Save a hackathon project to GitHub safely for non-technical participants. Use when a participant asks to create a GitHub repo, push code, save progress, make a commit, connect the local folder to GitHub, prepare source code for submission, write a README, or avoid committing secrets in a React plus Node.js or Go plus MySQL project."
+description: "Save a hackathon project to GitHub safely for non-technical participants. Use when a participant asks to create a GitHub repo, push code, save progress, make a commit, connect the local folder to GitHub, prepare source code for submission, write a README, or avoid committing secrets in a React plus Node.js or Go plus SQLite project."
 ---
 
 # Hackathon GitHub

@@ -1,6 +1,6 @@
 ---
 name: hackathon-explainer
-description: "Explain hackathon project state, errors, code changes, Docker, GitHub, GCP registry, MySQL, React, Node.js, or Go in plain language for non-technical participants and organizers. Use when the user asks what changed, what an error means, what to do next, how judges will run the app, or how to describe the project for submission."
+description: "Explain hackathon project state, errors, code changes, Docker, GitHub, GCP registry, SQLite, React, Node.js, or Go in plain language for non-technical participants and organizers. Use when the user asks what changed, what an error means, what to do next, how judges will run the app, or how to describe the project for submission."
 ---
 
 # Hackathon Explainer
@@ -30,13 +30,13 @@ Run command: ...
 For an error:
 
 ```text
-The app could not start because the database did not finish starting. I am going to make the app wait for MySQL before it opens.
+The app could not start because the database file was not created correctly. I am going to make the app create SQLite before it opens.
 ```
 
 For a feature:
 
 ```text
-You can now add customers from the form and see them in the table. The app saves them in MySQL, so they are available to the backend.
+You can now add customers from the form and see them in the table. The app saves them in SQLite, so they are available to the backend.
 ```
 
 ## Resource

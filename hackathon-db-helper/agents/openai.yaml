@@ -1,4 +1,4 @@
 interface:
   display_name: "Hackathon DB Helper"
-  short_description: "Handle MySQL changes safely"
-  default_prompt: "Use $hackathon-db-helper to update the MySQL database for my app."
+  short_description: "Handle SQLite changes safely"
+  default_prompt: "Use $hackathon-db-helper to update the SQLite database for my app."

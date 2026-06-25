@@ -1,6 +1,6 @@
 ---
 name: hackathon-db-helper
-description: "Make safe MySQL database changes for beginner hackathon apps using the allowed React plus Node.js or Go plus MySQL stack. Use when a participant asks to store new data, add a table, change fields, seed sample data, view saved data, reset test data, fix database connection errors, or align backend APIs with MySQL schema."
+description: "Make safe SQLite database changes for beginner hackathon apps using the allowed React plus Node.js or Go plus SQLite stack. Use when a participant asks to store new data, add a table, change fields, seed sample data, view saved data, reset test data, fix database file errors, or align backend APIs with SQLite schema."
 ---
 
 # Hackathon DB Helper
@@ -12,11 +12,11 @@ Handle database work without making the participant learn SQL. Keep data structu
 ## Workflow
 
 1. Inspect `db/`, backend database code, and environment variables.
-2. Read `references/mysql-rules.md`.
+2. Read `references/sqlite-rules.md`.
 3. For new data, create or update SQL in `db/init.sql` or the project's migration location.
 4. Update backend code to use parameterized queries.
 5. Update frontend forms and lists if the user asked for visible behavior.
-6. Run `scripts/mysql_smoke_check.sh` when a local database is available.
+6. Run `scripts/sqlite_smoke_check.sh` when a local database is available.
 7. Explain the database change in plain language.
 
 ## Safety Rules
@@ -29,5 +29,6 @@ Handle database work without making the participant learn SQL. Keep data structu
 
 ## Resources
 
-- `scripts/mysql_smoke_check.sh`: verify MySQL connection and list tables.
-- `references/mysql-rules.md`: schema and query rules for hackathon projects.
+- `scripts/sqlite_smoke_check.sh`: verify SQLite database access and list tables.
+- `scripts/sqlite_smoke_check.ps1`: Windows PowerShell SQLite database smoke check.
+- `references/sqlite-rules.md`: schema and query rules for hackathon projects.

@@ -1,6 +1,6 @@
 ---
 name: hackathon-feature-builder
-description: "Add participant-requested features to an existing hackathon app while keeping the allowed stack: React.js, Node.js or Go, and MySQL inside one final Docker image. Use when a non-technical participant asks for pages, forms, dashboards, login-like flows, CRUD features, API changes, database changes, UI improvements, or feature wiring across frontend, backend, and MySQL."
+description: "Add participant-requested features to an existing hackathon app while keeping the allowed stack: React.js, Node.js or Go, and SQLite inside one final Docker image. Use when a non-technical participant asks for pages, forms, dashboards, login-like flows, CRUD features, API changes, database changes, UI improvements, or feature wiring across frontend, backend, and SQLite."
 ---
 
 # Hackathon Feature Builder

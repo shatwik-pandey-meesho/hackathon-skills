@@ -15,7 +15,7 @@
 
 ## Data Does Not Save
 
-- Check MySQL is running.
+- Check the SQLite database file exists or can be created.
 - Check env vars match backend config.
 - Check SQL table and column names.
 - Check backend uses parameterized insert/update queries.
@@ -29,7 +29,7 @@
 ## Container Starts Then Exits
 
 - Check entrypoint logs.
-- Check MySQL startup wait loop.
+- Check SQLite database initialization path and file permissions.
 - Check app process is foregrounded or supervised.
 - Check port `8080` is exposed and used.
 

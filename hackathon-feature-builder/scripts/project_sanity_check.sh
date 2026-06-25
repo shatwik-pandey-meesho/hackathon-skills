@@ -41,7 +41,7 @@ fi
 if [[ -f db/init.sql ]]; then
   echo "OK      db/init.sql"
 else
-  echo "WARN    db/init.sql not found; ensure MySQL schema is initialized another way"
+  echo "WARN    db/init.sql not found; ensure SQLite schema is initialized another way"
 fi
 
 if command -v npm >/dev/null 2>&1 && [[ -f frontend/package.json ]]; then

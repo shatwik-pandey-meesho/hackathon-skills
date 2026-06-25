@@ -1,6 +1,6 @@
 ---
 name: hackathon-bootstrap
-description: "Create or repair a beginner-friendly hackathon starter project using only React.js for the frontend, Node.js or Go for the backend, and MySQL for storage. Use when a participant asks to start a new project, set up their laptop, install required tools, choose the allowed stack, create Docker files, or make the first locally previewable app for a single-image hackathon submission."
+description: "Create or repair a beginner-friendly hackathon starter project using only React.js for the frontend, Node.js or Go for the backend, and SQLite for storage. Use when a participant asks to start a new project, set up their laptop, install required tools, choose the allowed stack, create Docker files, or make the first locally previewable app for a single-image hackathon submission."
 ---
 
 # Hackathon Bootstrap
@@ -15,7 +15,7 @@ Use only:
 
 - Frontend: React.js
 - Backend: Node.js or Go
-- Database: MySQL
+- Database: SQLite
 - Packaging: one Docker image containing app and database startup
 
 Do not introduce Next.js, Python, Java, MongoDB, Postgres, Redis, Firebase, Supabase, or separate runtime services unless the organizer changes the rules.
@@ -41,5 +41,6 @@ Read `references/project-contract.md` before creating or repairing a starter. Th
 
 ## Resources
 
-- `scripts/check_and_install_tools.sh`: detect OS, check required tools, optionally install common packages.
+- `scripts/check_and_install_tools.sh`: detect OS, check required tools, optionally install common packages on macOS/Linux.
+- `scripts/check_and_install_tools.ps1`: check tools and optionally install common packages on Windows.
 - `references/project-contract.md`: starter project requirements for all hackathon apps.

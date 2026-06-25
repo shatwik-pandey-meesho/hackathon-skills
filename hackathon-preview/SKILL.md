@@ -1,6 +1,6 @@
 ---
 name: hackathon-preview
-description: "Start, restart, or preview a hackathon project locally so non-technical participants can open the app in a browser. Use when the user says show my app, run it locally, preview changes, start Docker, open the project, check if it works, or get a local URL for a React plus Node or Go plus MySQL single-image project."
+description: "Start, restart, or preview a hackathon project locally so non-technical participants can open the app in a browser. Use when the user says show my app, run it locally, preview changes, start Docker, open the project, check if it works, or get a local URL for a React plus Node or Go plus SQLite single-image project."
 ---
 
 # Hackathon Preview

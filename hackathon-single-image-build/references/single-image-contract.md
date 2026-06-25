@@ -6,9 +6,9 @@ The final image must include everything judges need to start the project.
 
 - React production build copied into the runtime image.
 - Node.js server or Go binary in the runtime image.
-- MySQL server installed in the runtime image.
+- SQLite runtime support installed in the image only if the backend needs the `sqlite3` CLI at runtime.
 - Database initialization from `db/init.sql` or equivalent.
-- Startup script that waits for MySQL before starting the app.
+- Startup script that creates the SQLite database file before starting the app.
 - App listens on port `8080`.
 - `/health` succeeds after startup.
 
@@ -17,8 +17,7 @@ The final image must include everything judges need to start the project.
 - Use a multi-stage Dockerfile.
 - Build frontend in a Node stage.
 - Build backend in a Node or Go stage.
-- Use Debian or Ubuntu runtime when bundling MySQL.
-- Use `supervisord`, `tini`, or a careful shell entrypoint to manage MySQL and app processes.
+- Use a simple entrypoint script when database initialization must happen before the app starts.
 
 ## Not Allowed For Final Submission
 

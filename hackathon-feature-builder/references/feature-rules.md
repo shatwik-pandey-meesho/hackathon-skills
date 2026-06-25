@@ -2,7 +2,7 @@
 
 Build features as a complete vertical slice:
 
-1. Data shape in MySQL.
+1. Data shape in SQLite.
 2. Backend route or handler.
 3. Frontend screen, form, list, chart, or button.
 4. Basic validation and error display.

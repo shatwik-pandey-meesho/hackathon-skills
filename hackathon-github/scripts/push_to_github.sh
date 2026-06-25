@@ -37,7 +37,12 @@ dist/
 build/
 .DS_Store
 *.log
-mysql-data/
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.sqlite
+data/*.sqlite3
 data/
 EOF
 fi

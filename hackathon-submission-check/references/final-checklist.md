@@ -9,7 +9,7 @@ The project is ready when these pass:
 - The image starts with `docker run --rm -p 8080:8080 IMAGE`.
 - Browser loads `http://localhost:8080`.
 - `/health` returns success.
-- MySQL initializes inside the image.
+- SQLite initializes inside the image.
 - Final image is pushed or ready to push to Artifact Registry.
 - README includes the final run command and image URL when available.
 

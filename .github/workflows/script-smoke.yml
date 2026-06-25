@@ -1,0 +1,84 @@
+name: Script Smoke Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  macos:
+    name: macOS Bash scripts
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check skill frontmatter
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for path in sorted(Path('.').glob('hackathon-*/SKILL.md')):
+              text = path.read_text()
+              assert text.startswith('---\n'), f'missing frontmatter: {path}'
+              end = text.find('\n---\n', 4)
+              assert end != -1, f'unclosed frontmatter: {path}'
+              fm = text[4:end]
+              assert 'name:' in fm, f'missing name: {path}'
+              assert 'description:' in fm, f'missing description: {path}'
+              print(f'OK {path}')
+          PY
+
+      - name: Check Bash syntax and help
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in hackathon-*/scripts/*.sh; do
+            echo "$f"
+            bash -n "$f"
+            "$f" --help >/dev/null
+          done
+
+      - name: Ensure legacy database references were removed
+        shell: bash
+        run: |
+          set -euo pipefail
+          pattern='[m]ysql|[M]ySQL'
+          if find . -path ./.git -prune -o -type f -print0 | xargs -0 grep -InE "$pattern"; then
+            echo "Legacy database references found"
+            exit 1
+          fi
+
+  windows:
+    name: Windows PowerShell scripts
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check PowerShell syntax and help
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $scripts = Get-ChildItem -Path . -Recurse -Filter *.ps1
+          if (-not $scripts) {
+            throw "No PowerShell scripts found"
+          }
+          foreach ($script in $scripts) {
+            Write-Host $script.FullName
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Host
+              throw "PowerShell parse failed for $($script.FullName)"
+            }
+            & $script.FullName -Help | Out-Null
+          }
+
+      - name: Ensure matching Bash scripts exist
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          foreach ($ps in Get-ChildItem -Path hackathon-* -Recurse -Filter *.ps1) {
+            $sh = [System.IO.Path]::ChangeExtension($ps.FullName, ".sh")
+            if (-not (Test-Path $sh)) {
+              throw "Missing Bash counterpart for $($ps.FullName)"
+            }
+          }

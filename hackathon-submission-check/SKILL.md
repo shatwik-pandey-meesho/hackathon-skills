@@ -1,6 +1,6 @@
 ---
 name: hackathon-submission-check
-description: "Run the final readiness checklist for a non-technical hackathon team before judging. Use when a participant asks if the project is ready, wants a final check, needs to verify the single Docker image, GitHub repo, GCP Artifact Registry push, local preview, MySQL startup, README, or absence of committed secrets."
+description: "Run the final readiness checklist for a non-technical hackathon team before judging. Use when a participant asks if the project is ready, wants a final check, needs to verify the single Docker image, GitHub repo, GCP Artifact Registry push, local preview, SQLite initialization, README, or absence of committed secrets."
 ---
 
 # Hackathon Submission Check
@@ -27,7 +27,7 @@ Check the complete judging path end to end. The output should be a clear pass/fa
 - The image starts with `docker run`.
 - A browser can load the app.
 - Backend health or API responds.
-- MySQL initializes.
+- SQLite initializes.
 - GitHub repo is reachable.
 - Final image URL is known or ready to push.
 - No obvious secrets are committed.
