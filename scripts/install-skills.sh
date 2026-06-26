@@ -140,9 +140,9 @@ case "$AGENT" in
     ;;
   claude)
     if [[ -z "$DEST" ]]; then
-      echo "--dest is required for claude installs." >&2
-      echo "This script copies the skill folders for Claude to use, but does not assume a built-in Claude skills path." >&2
-      exit 1
+      DEST="$HOME/.claude/skills"
+      echo "No --dest given. Defaulting to the personal Claude skills directory: $DEST"
+      echo "For a single project only, pass --dest <project>/.claude/skills instead."
     fi
     ;;
   *)

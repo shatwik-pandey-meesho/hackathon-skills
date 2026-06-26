@@ -13,7 +13,7 @@ Package the whole project into one runnable image for judges. The goal is not pr
 
 1. Read `references/single-image-contract.md`.
 2. Inspect `Dockerfile`, `.dockerignore`, `frontend/`, `backend/`, and `db/`.
-3. If missing, create a Dockerfile that builds React, builds Node.js or Go, initializes the SQLite schema, and starts the app.
+3. If missing, create a Dockerfile that builds React, builds Node.js or Go, initializes the SQLite schema, and starts the app. Use Debian slim base images only (`node:20-bookworm-slim` for Node stages, `golang:1.22-bookworm` + `debian:bookworm-slim` for Go). Never use Alpine — its musl libc breaks SQLite native builds for beginners.
 4. Run `scripts/build_single_image.sh <image-name>:<tag>`.
 5. Confirm the container starts and `GET /health` or the root page responds.
 6. Report the image tag and exact `docker run` command.

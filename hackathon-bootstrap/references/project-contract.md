@@ -7,7 +7,7 @@ Use this contract when creating or repairing a participant project.
 - `frontend/`: React.js app.
 - `backend/`: Node.js or Go API/server.
 - `db/`: SQLite schema and seed files, normally `db/init.sql`.
-- `Dockerfile`: builds and runs the final single image.
+- `Dockerfile`: builds and runs the final single image. Use Debian slim base images only (`node:20-bookworm-slim` for Node stages; `golang:1.22-bookworm` build + `debian:bookworm-slim` runtime for Go). Do not use Alpine — its musl libc breaks SQLite native builds.
 - `.dockerignore`: excludes dependencies, build outputs, git metadata, env files, and local database files.
 - `.env.example`: documents configurable values without secrets.
 - `README.md`: gives local preview, build, run, and final image commands.

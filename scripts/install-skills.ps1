@@ -55,7 +55,9 @@ switch ($Agent) {
   }
   "claude" {
     if (-not $Dest) {
-      throw "-Dest is required for claude installs. This script copies the skill folders for Claude to use, but does not assume a built-in Claude skills path."
+      $Dest = Join-Path $HOME ".claude\skills"
+      Write-Host "No -Dest given. Defaulting to the personal Claude skills directory: $Dest"
+      Write-Host "For a single project only, pass -Dest <project>\.claude\skills instead."
     }
   }
   default {

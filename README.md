@@ -57,4 +57,8 @@ For Claude, copy the skill folders into a destination directory:
 - macOS/Linux: `./scripts/install-skills.sh --agent claude --dest "$HOME/claude-skills"`
 - Windows PowerShell: `.\scripts\install-skills.ps1 -Agent claude -Dest "$HOME\claude-skills"`
 
-See [INSTALLING.md](/Users/shatwik.pandey/Projects/BUILDATHON/skills/INSTALLING.md) for the full method and options.
+See [INSTALLING.md](./INSTALLING.md) for all install methods (automated script, manual copy into `.claude`, use-from-repo, Codex).
+
+## Using the Skills
+
+See [USAGE.md](./USAGE.md) for how the skills work together, the guardrails they enforce, and a full worked example that takes a non-technical team from an empty laptop to a judge-ready image.
