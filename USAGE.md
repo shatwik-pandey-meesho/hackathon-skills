@@ -33,7 +33,7 @@ You will loop through 2–6 many times while building. Steps 7–10 happen near 
 So you don't have to think about them:
 
 - **Allowed stack only:** React frontend, Node.js *or* Go backend, SQLite database. No
-  Next.js, Python, Java, Postgres, Mongo, Redis, Firebase, etc.
+  other frontend framework, backend language, database, cache, hosted backend, or separate service.
 - **Fixed ports:** frontend on `9080`, backend on `8090`.
 - **One final Docker image** that contains the frontend, backend, and database setup —
   no Docker Compose or separate database container at judging.

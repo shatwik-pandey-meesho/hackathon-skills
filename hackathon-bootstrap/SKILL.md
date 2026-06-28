@@ -18,7 +18,7 @@ Use only:
 - Database: SQLite
 - Packaging: one Docker image containing app and database startup
 
-Do not introduce Next.js, Python, Java, MongoDB, Postgres, Redis, Firebase, Supabase, or separate runtime services unless the organizer changes the rules.
+Do not introduce any other frontend framework, backend language, database, cache, hosted backend, or separate runtime service unless the organizer changes the rules.
 
 ## Workflow
 

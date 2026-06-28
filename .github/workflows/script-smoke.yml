@@ -56,13 +56,19 @@ jobs:
           test -d "$DEST/hackathon-preview"
           test ! -d "$DEST/hackathon-bugfix"
 
-      - name: Ensure legacy database references were removed
+      - name: Check allowed app stack policy
         shell: bash
         run: |
           set -euo pipefail
-          pattern='[m]ysql|[M]ySQL'
+          grep -q 'React.js frontend' README.md
+          grep -q 'Node.js or Go backend' README.md
+          grep -q 'SQLite database' README.md
+          grep -q 'Frontend: React.js' hackathon-bootstrap/SKILL.md
+          grep -q 'Backend: Node.js or Go' hackathon-bootstrap/SKILL.md
+          grep -q 'Database: SQLite' hackathon-bootstrap/SKILL.md
+          pattern='[m]ysql|[M]ySQL|[P]ostgres|[M]ongo|[R]edis|[F]irebase|[S]upabase|[N]ext[.]js'
           if find . -path ./.git -prune -o -type f -print0 | xargs -0 grep -InE "$pattern"; then
-            echo "Legacy database references found"
+            echo "Disallowed app-stack references found"
             exit 1
           fi
 

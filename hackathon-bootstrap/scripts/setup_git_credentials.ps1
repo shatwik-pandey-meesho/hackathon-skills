@@ -17,8 +17,27 @@ short-lived hackathon machine. Do not do this on a shared or long-lived account.
 
 param(
   [ValidateSet('gh', 'pat')]
-  [string]$Method = 'gh'
+  [string]$Method = 'gh',
+  [switch]$Help
 )
+
+if ($Help) {
+  @"
+Usage: .\setup_git_credentials.ps1 [-Method gh|pat]
+
+Stores your GitHub token in a plain-text file and configures git to use it,
+so pushing to GitHub never asks for a password.
+
+Methods:
+  -Method gh    (default) reuse the token from gh auth login. Starts browser login if needed.
+  -Method pat   paste a classic PAT from https://github.com/settings/tokens (scope: repo).
+
+Environment:
+  GIT_CREDENTIALS_FILE   override the credential file path (default: ~/.git-credentials)
+  GITHUB_PAT             if set, used as the token in -Method pat without prompting
+"@
+  exit 0
+}
 
 $ErrorActionPreference = 'Stop'
 

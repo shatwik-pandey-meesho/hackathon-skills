@@ -25,7 +25,7 @@ Handle database work without making the participant learn SQL. Keep data structu
 - Prefer additive changes: new columns with defaults, new tables, new indexes.
 - Use `id INTEGER PRIMARY KEY AUTOINCREMENT` IDs unless the project already uses UUIDs; avoid complex composite keys.
 - Use `created_at` timestamps for participant-created records.
-- Account for SQLite migration limits before changing existing tables; do not assume MySQL/Postgres `ALTER TABLE` behavior.
+- Account for SQLite migration limits before changing existing tables; do not assume other SQL engines' `ALTER TABLE` behavior.
 - Store Docker SQLite data under `/app/data`, backed by the repo-local ignored `data/` directory.
 - Keep Dockerfiles on Debian slim images; do not switch to Alpine for SQLite.
 - Keep sample seed data small and obviously fake.

@@ -4,7 +4,8 @@ param(
   [string]$Output = "",
   [string]$Name = "hackathon-skills",
   [switch]$Force,
-  [switch]$List
+  [switch]$List,
+  [switch]$Help
 )
 
 # Bundle the hackathon skill folders, docs, and install scripts into a single
@@ -37,6 +38,27 @@ $InstallScripts = @(
   "scripts/install-skills.sh",
   "scripts/install-skills.ps1"
 )
+
+if ($Help) {
+  @"
+Usage: .\scripts\bundle-skills.ps1 [-Output PATH] [-Name NAME] [-Force] [-List]
+
+Bundles the skill folders, docs (README/USAGE/INSTALLING), and install scripts
+into a single zip that extracts to a top-level hackathon-skills/ folder.
+
+Options:
+  -Output PATH  Output zip path. Default: <repo>\dist\hackathon-skills.zip
+  -Name NAME    Top-level folder name inside the zip. Default: hackathon-skills
+  -Force        Overwrite the output zip if it already exists.
+  -List         Print what would be bundled and exit.
+  -Help         Show this help text.
+
+Examples:
+  .\scripts\bundle-skills.ps1
+  .\scripts\bundle-skills.ps1 -Output $env:TEMP\skills.zip -Force
+"@
+  exit 0
+}
 
 if ($List) {
   Write-Host "Skills:";          $Skills          | ForEach-Object { Write-Host "  $_" }
