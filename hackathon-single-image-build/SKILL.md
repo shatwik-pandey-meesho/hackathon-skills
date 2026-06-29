@@ -1,6 +1,6 @@
 ---
 name: hackathon-single-image-build
-description: "Build and smoke-test the final required single Docker image for a hackathon app containing React frontend assets, Node.js or Go backend runtime, and SQLite initialization behavior. Use when a participant asks to build the final image, prepare for judging, package frontend/backend/database together, create a Dockerfile, test docker run, or produce the image tag that will be pushed to a registry or swarm."
+description: "Build and smoke-test the final required single Docker image for a hackathon app containing React frontend assets, Node.js or Go backend runtime, and SQLite initialization behavior. Use when a participant asks to build the final image, prepare for judging, package frontend/backend/database together, create a Dockerfile, test docker run, or produce the image tag that will be pushed to a registry."
 ---
 
 # Hackathon Single Image Build

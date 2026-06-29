@@ -7,8 +7,8 @@ if ($Help) {
   @"
 Usage: .\check_and_install_tools.ps1 [-Install]
 
-Checks tools needed for the hackathon stack:
-git, docker, docker compose, node, npm, go, sqlite3, gh, and gcloud.
+Checks tools needed for the core hackathon stack:
+git, docker, docker compose, node, npm, go, sqlite3, and gh.
 
 Default mode only reports missing tools. -Install attempts best-effort installs
 on Windows with winget.
@@ -38,7 +38,6 @@ Test-Command "npm" "npm"
 Test-Command "go" "go"
 Test-Command "sqlite3" "sqlite3"
 Test-Command "GitHub CLI gh" "gh"
-Test-Command "Google Cloud CLI gcloud" "gcloud"
 
 if (Get-Command docker -ErrorAction SilentlyContinue) {
   try {
@@ -74,6 +73,4 @@ winget install --id OpenJS.NodeJS.LTS -e --accept-package-agreements --accept-so
 winget install --id GoLang.Go -e --accept-package-agreements --accept-source-agreements
 winget install --id SQLite.SQLite -e --accept-package-agreements --accept-source-agreements
 winget install --id GitHub.cli -e --accept-package-agreements --accept-source-agreements
-winget install --id Google.CloudSDK -e --accept-package-agreements --accept-source-agreements
-
 Write-Host "Docker Desktop may need to be opened once before Docker commands work."

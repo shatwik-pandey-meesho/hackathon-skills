@@ -106,10 +106,6 @@ try {
   docker rm -f $container *> $null
 }
 
-if (Get-Command gcloud -ErrorAction SilentlyContinue) {
-  Warn "gcloud is installed; registry URL still needs to be confirmed from push output"
-} else {
-  Warn "gcloud missing; cannot verify Artifact Registry push from this machine"
-}
+Warn "Artifact Registry upload is handled by hackathon-gcp-push when the final image is ready"
 
 if ($failed) { exit 1 }

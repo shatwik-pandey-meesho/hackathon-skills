@@ -109,10 +109,6 @@ if [[ "$READY" != "true" ]]; then
   docker logs --tail=100 "$CONTAINER" || true
 fi
 
-if have gcloud; then
-  warn "gcloud is installed; registry URL still needs to be confirmed from push output"
-else
-  warn "gcloud missing; cannot verify Artifact Registry push from this machine"
-fi
+warn "Artifact Registry upload is handled by hackathon-gcp-push when the final image is ready"
 
 exit "$FAIL"

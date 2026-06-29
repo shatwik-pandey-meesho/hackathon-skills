@@ -18,6 +18,7 @@ REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE_NAME:TAG
 
 ## Safe Commands
 
+- `gcloud version`
 - `gcloud auth list`
 - `gcloud config get-value project`
 - `gcloud auth configure-docker REGION-docker.pkg.dev`
@@ -25,17 +26,3 @@ REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE_NAME:TAG
 - `docker push FINAL_URL`
 
 Create repositories only when organizers permit it.
-
-## Docker Swarm
-
-After the image is pushed, judges can deploy it to a Swarm service with a command like:
-
-```text
-docker service create --name TEAM_SERVICE --publish 9080:9080 --publish 8090:8090 FINAL_IMAGE_URL
-```
-
-For an existing service:
-
-```text
-docker service update --image FINAL_IMAGE_URL TEAM_SERVICE
-```

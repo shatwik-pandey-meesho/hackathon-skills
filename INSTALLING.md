@@ -18,8 +18,10 @@ Installing means **putting these folders where your agent looks for skills**. No
 compiled and nothing runs during install — it is a plain folder copy.
 
 > The installer copies skill folders only. It does **not** install Docker, Node.js, Go,
-> SQLite, the GitHub CLI, or the GCP CLI. Those are installed later by the
-> `hackathon-bootstrap` skill itself.
+> SQLite, or the GitHub CLI. Those are installed later by the
+> `hackathon-bootstrap` skill itself. The GCP CLI is intentionally separate and
+> handled only by the `hackathon-gcp-push` skill when a team is ready to upload
+> a final image.
 
 ---
 

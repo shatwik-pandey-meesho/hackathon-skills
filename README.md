@@ -28,7 +28,7 @@ survive container restarts while `.db` files stay out of Git.
 - `hackathon-bugfix`: diagnose and fix common app, Docker, and database failures.
 - `hackathon-db-helper`: make safe SQLite schema and data changes.
 - `hackathon-single-image-build`: build and smoke-test the final image.
-- `hackathon-gcp-push`: push the image to GCP Artifact Registry and print Swarm commands.
+- `hackathon-gcp-push`: install or verify the GCP CLI, then push the image to GCP Artifact Registry.
 - `hackathon-github`: save the project to GitHub without committing secrets.
 - `hackathon-submission-check`: run the final judging readiness checklist.
 - `hackathon-explainer`: explain technical results in non-technical language.

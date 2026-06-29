@@ -153,8 +153,9 @@ mkdir -p data && docker run --rm -p 9080:9080 -p 8090:8090 -v "$(pwd)/data:/app/
 
 > *"Upload the image to GCP Artifact Registry for the judges."*
 
-`hackathon-gcp-push` authenticates Docker with GCP, tags the image for the registry, pushes
-it, and prints the final registry URL the judges will pull.
+`hackathon-gcp-push` installs or verifies the GCP CLI, authenticates Docker with GCP,
+tags the image for the registry, pushes it, and prints the final registry URL the
+judges will pull.
 
 ### Step 10 — Final readiness check
 
