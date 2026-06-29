@@ -37,9 +37,11 @@
 - Check app process is foregrounded or supervised.
 - Check frontend port `9080` and backend port `8090` are exposed and not already used by another program.
 
-## GCP Push Fails
+## Proxy Push Fails
 
-- Check `gcloud auth list`.
-- Check Docker is authenticated for `REGION-docker.pkg.dev`.
-- Check Artifact Registry repository exists.
-- Check user has write permission.
+- Check Docker Desktop is running and `docker info` works.
+- Check the proxy host is only the registry host, with no `https://` prefix and no path.
+- Check the Docker login username and token are the organizer-provided values.
+- Check the local image exists before tagging.
+- Check the image passes the local health check on frontend `9080` and backend `/health` on `8090`.
+- Check the final tag uses the GitHub username as both folder and image name: `PROXY_HOST/GITHUB_USER/GITHUB_USER:TAG`.

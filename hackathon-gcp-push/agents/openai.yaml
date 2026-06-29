@@ -1,4 +1,0 @@
-interface:
-  display_name: "GCP Registry Push"
-  short_description: "Install gcloud and push image"
-  default_prompt: "Use $hackathon-gcp-push to install or verify gcloud and push my final image to Artifact Registry."

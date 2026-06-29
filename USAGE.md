@@ -21,7 +21,7 @@ you understand what is happening under the hood.
 | 6. Explain | "What changed? Explain it simply" | `hackathon-explainer` |
 | 7. Save | "Save my project to GitHub" | `hackathon-github` |
 | 8. Package | "Build the final single image for judging" | `hackathon-single-image-build` |
-| 9. Push | "Upload the image to GCP for the judges" | `hackathon-gcp-push` |
+| 9. Push | "Upload the image through the hackathon proxy for the judges" | `hackathon-deploy-by-pushing-image` |
 | 10. Final check | "Is my project ready to submit?" | `hackathon-submission-check` |
 
 You will loop through 2–6 many times while building. Steps 7–10 happen near the end.
@@ -149,13 +149,14 @@ waits for `/health` and the homepage, and prints the exact run command:
 mkdir -p data && docker run --rm -p 9080:9080 -p 8090:8090 -v "$(pwd)/data:/app/data" recipebox:final
 ```
 
-### Step 9 — Push to GCP
+### Step 9 — Push through the proxy
 
-> *"Upload the image to GCP Artifact Registry for the judges."*
+> *"Upload the image through the hackathon proxy for the judges."*
 
-`hackathon-gcp-push` installs or verifies the GCP CLI, authenticates Docker with GCP,
-tags the image for the registry, pushes it, and prints the final registry URL the
-judges will pull.
+`hackathon-deploy-by-pushing-image` asks for the organizer proxy URL, login username, and token,
+checks that the image runs locally, tags it using Priya's GitHub username as both
+the folder and image name, pushes it through the proxy, and prints the final image
+URL the judges will pull.
 
 ### Step 10 — Final readiness check
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deploy By Pushing Image"
+  short_description: "Push image through the organizer proxy"
+  default_prompt: "Use $hackathon-deploy-by-pushing-image to verify my local image and push it through the organizer proxy."

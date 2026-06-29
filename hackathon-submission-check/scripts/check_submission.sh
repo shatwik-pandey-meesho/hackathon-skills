@@ -109,6 +109,6 @@ if [[ "$READY" != "true" ]]; then
   docker logs --tail=100 "$CONTAINER" || true
 fi
 
-warn "Artifact Registry upload is handled by hackathon-gcp-push when the final image is ready"
+warn "Registry upload through the organizer proxy is handled by hackathon-deploy-by-pushing-image when the final image is ready"
 
 exit "$FAIL"

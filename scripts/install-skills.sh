@@ -16,7 +16,7 @@ SKILLS=(
   "hackathon-bugfix"
   "hackathon-db-helper"
   "hackathon-single-image-build"
-  "hackathon-gcp-push"
+  "hackathon-deploy-by-pushing-image"
   "hackathon-github"
   "hackathon-submission-check"
   "hackathon-explainer"

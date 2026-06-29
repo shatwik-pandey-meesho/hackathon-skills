@@ -8,7 +8,7 @@ This repo contains 10 skill folders:
 - `hackathon-bugfix`
 - `hackathon-db-helper`
 - `hackathon-single-image-build`
-- `hackathon-gcp-push`
+- `hackathon-deploy-by-pushing-image`
 - `hackathon-github`
 - `hackathon-submission-check`
 - `hackathon-explainer`
@@ -19,9 +19,7 @@ compiled and nothing runs during install — it is a plain folder copy.
 
 > The installer copies skill folders only. It does **not** install Docker, Node.js, Go,
 > SQLite, or the GitHub CLI. Those are installed later by the
-> `hackathon-bootstrap` skill itself. The GCP CLI is intentionally separate and
-> handled only by the `hackathon-gcp-push` skill when a team is ready to upload
-> a final image.
+> `hackathon-bootstrap` skill itself. Proxy uploads need Docker only.
 
 ---
 

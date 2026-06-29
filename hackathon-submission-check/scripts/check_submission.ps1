@@ -106,6 +106,6 @@ try {
   docker rm -f $container *> $null
 }
 
-Warn "Artifact Registry upload is handled by hackathon-gcp-push when the final image is ready"
+Warn "Registry upload through the organizer proxy is handled by hackathon-deploy-by-pushing-image when the final image is ready"
 
 if ($failed) { exit 1 }
