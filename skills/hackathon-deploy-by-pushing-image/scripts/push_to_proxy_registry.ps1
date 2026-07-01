@@ -1,10 +1,10 @@
 param(
-  [string]$ProxyHost,
+  [string]$ProxyHost = "registry.buildathon.meesho.dev",
   [string]$LoginUser = "hackathon",
   [string]$Token = $env:HACKATHON_PROXY_TOKEN,
   [string]$LocalImage,
   [string]$User = $env:MEESHO_EMAIL,
-  [string]$Tag = "final",
+  [string]$Tag,
   [string]$DataDir,
   [int]$FrontendPort = $(if ($env:FRONTEND_PORT) { [int]$env:FRONTEND_PORT } else { 9080 }),
   [int]$BackendPort = $(if ($env:BACKEND_PORT) { [int]$env:BACKEND_PORT } else { 8090 }),
@@ -14,29 +14,27 @@ param(
 
 if ($Help) {
   @"
-Usage: .\push_to_proxy_registry.ps1 -ProxyHost HOST -Token TOKEN -LocalImage IMAGE [options]
+Usage: .\push_to_proxy_registry.ps1 -Token TOKEN -LocalImage IMAGE [options]
 
 Logs in to a token-authenticated Docker proxy, verifies the local image starts,
-tags it as HOST/USER/USER:TAG, and pushes it.
+tags it as HOST/TEAM_ID:TAG, and pushes it.
 
 Required:
-  -ProxyHost HOST       Proxy registry host, for example hackathon-proxy-xxxxx.run.app
   -Token TOKEN          Registry token or password. Can also use HACKATHON_PROXY_TOKEN.
   -LocalImage IMAGE     Existing local image to push, for example hackathon-app:final
-  -User SLUG            Identity slug for the image path. Pass the part of the participant's
-                        Meesho email before @ (for example priya.sharma). A full email is
-                        accepted and the part before @ is used. Can also use MEESHO_EMAIL.
+  -User EMAIL           Participant's Meesho email. Can also use MEESHO_EMAIL.
 
 Options:
+  -ProxyHost HOST       Proxy registry host. Default: registry.buildathon.meesho.dev
   -LoginUser USER       Docker login username. Default: hackathon
-  -Tag TAG              Final image tag. Default: final
+  -Tag TAG              Final image tag. Default: UTC timestamp, e.g. 20260701-053012
   -DataDir DIR          Optional host data dir to mount to /app/data during smoke test.
                         Final images should normally pass without this.
   -SkipSmoke            Skip local container health check. Use only if already checked.
   -Help                 Show this help text.
 
 Final image URL:
-  HOST/USER/USER:TAG
+  HOST/TEAM_ID:TAG
 "@
   exit 0
 }
@@ -52,11 +50,10 @@ function Test-Command($Name) {
   return [bool](Get-Command $Name -ErrorAction SilentlyContinue)
 }
 
-if ([string]::IsNullOrWhiteSpace($ProxyHost)) { Fail "-ProxyHost is required." }
 if ([string]::IsNullOrWhiteSpace($Token)) { Fail "-Token is required, or set HACKATHON_PROXY_TOKEN." }
 if ([string]::IsNullOrWhiteSpace($LocalImage)) { Fail "-LocalImage is required." }
 if ([string]::IsNullOrWhiteSpace($LoginUser)) { Fail "-LoginUser cannot be empty." }
-if ([string]::IsNullOrWhiteSpace($Tag)) { Fail "-Tag cannot be empty." }
+if ([string]::IsNullOrWhiteSpace($Tag)) { $Tag = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss") }
 
 if (-not (Test-Command "docker")) { Fail "Docker is not installed or not on PATH." }
 if (-not (Test-Command "curl")) { Fail "curl is required for the local health check." }
@@ -69,17 +66,32 @@ $ProxyHost = $ProxyHost -replace "^https?://", ""
 $ProxyHost = $ProxyHost.TrimEnd("/")
 if ($ProxyHost.Contains("/")) { Fail "-ProxyHost must be only the registry host, without a path." }
 
-if ([string]::IsNullOrWhiteSpace($User)) {
-  Fail "Could not determine the identity slug. Pass -User (the Meesho email name before @), or set MEESHO_EMAIL."
+if ([string]::IsNullOrWhiteSpace($User) -and (Test-Path ".agent-memory/state.json")) {
+  try {
+    $state = Get-Content -Raw ".agent-memory/state.json" | ConvertFrom-Json
+    if (-not [string]::IsNullOrWhiteSpace($state.participant_email)) {
+      $User = $state.participant_email
+    } elseif (-not [string]::IsNullOrWhiteSpace($state.team_id)) {
+      $User = $state.team_id
+    }
+  } catch {}
 }
 
-# Accept a full email and use the part before @; then lowercase for Docker.
-$slug = ($User -split "@")[0]
-$imageNamespace = $slug.ToLowerInvariant()
-$imageName = $imageNamespace
+if ([string]::IsNullOrWhiteSpace($User)) {
+  Fail "Could not determine the participant email. Pass -User, or set MEESHO_EMAIL."
+}
 
-if ($imageNamespace -notmatch "^[a-z0-9]+([._-][a-z0-9]+)*$") {
-  Fail "Identity '$slug' becomes invalid Docker path '$imageNamespace'. Pass a Docker-safe -User."
+function ConvertTo-TeamId($EmailOrSlug) {
+  $prefix = ($EmailOrSlug -split "@")[0].ToLowerInvariant()
+  $slug = [regex]::Replace($prefix, "[^a-z0-9_-]+", "-")
+  $slug = $slug.Trim("-")
+  return $slug
+}
+
+$teamId = ConvertTo-TeamId $User
+
+if ([string]::IsNullOrWhiteSpace($teamId) -or ($teamId -notmatch "^([a-z0-9]|[a-z0-9][a-z0-9_-]*[a-z0-9])$")) {
+  Fail "Email '$User' becomes invalid team id '$teamId'. Use a Meesho email with letters or numbers before @."
 }
 if ($Tag -notmatch "^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$") {
   Fail "Invalid Docker tag '$Tag'. Use letters, numbers, underscores, dots, or dashes."
@@ -148,7 +160,7 @@ if (-not $SkipSmoke) {
   Write-Host "Skipping local smoke test because -SkipSmoke was provided."
 }
 
-$finalUrl = "$ProxyHost/$imageNamespace/${imageName}:$Tag"
+$finalUrl = "$ProxyHost/${teamId}:$Tag"
 
 Write-Host "Logging in to $ProxyHost as $LoginUser"
 $Token | docker login $ProxyHost --username $LoginUser --password-stdin | Out-Null
@@ -159,6 +171,37 @@ if ($LASTEXITCODE -ne 0) { Fail "Docker tag failed." }
 
 docker push $finalUrl
 if ($LASTEXITCODE -ne 0) { Fail "Docker push failed." }
+
+function Update-AgentMemory {
+  $memoryDir = ".agent-memory"
+  $statePath = Join-Path $memoryDir "state.json"
+  if (-not (Test-Path $statePath)) { return }
+
+  try {
+    $state = Get-Content -Raw $statePath | ConvertFrom-Json
+    $state | Add-Member -NotePropertyName participant_email -NotePropertyValue $User -Force
+    $state | Add-Member -NotePropertyName team_id -NotePropertyValue $teamId -Force
+    $state | Add-Member -NotePropertyName registry_proxy_host -NotePropertyValue $ProxyHost -Force
+    $state | Add-Member -NotePropertyName registry_login_user -NotePropertyValue $LoginUser -Force
+    $state | Add-Member -NotePropertyName registry_url -NotePropertyValue $finalUrl -Force
+    $state | Add-Member -NotePropertyName last_pushed_image -NotePropertyValue $finalUrl -Force
+    $state | Add-Member -NotePropertyName last_pushed_tag -NotePropertyValue $Tag -Force
+    $state | Add-Member -NotePropertyName last_successful_step -NotePropertyValue "pushed image through registry proxy" -Force
+    $state | Add-Member -NotePropertyName current_status -NotePropertyValue "image pushed" -Force
+    $state | Add-Member -NotePropertyName current_blocker -NotePropertyValue "" -Force
+    $state | Add-Member -NotePropertyName next_action -NotePropertyValue "run final submission check" -Force
+    $state | Add-Member -NotePropertyName last_updated -NotePropertyValue ([DateTimeOffset]::UtcNow.ToString("o")) -Force
+    $state | ConvertTo-Json -Depth 10 | Set-Content -Path $statePath -Encoding utf8
+
+    $activityPath = Join-Path $memoryDir "activity.md"
+    "`n## $([DateTimeOffset]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))`nPushed final image for team_id $teamId to $finalUrl." |
+      Add-Content -Path $activityPath -Encoding utf8
+  } catch {
+    Write-Warning "Could not update .agent-memory: $($_.Exception.Message)"
+  }
+}
+
+Update-AgentMemory
 
 Write-Host "Final image URL:"
 Write-Host $finalUrl
