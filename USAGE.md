@@ -61,7 +61,8 @@ triggers the skill named in parentheses:
    printed `.zip` file to the organizer's folder yourself** (manual step; no login needed).
 8. **Package** *(hackathon-single-image-build)* — "Build the final single image and test it runs."
 9. **Push for judging** *(hackathon-deploy-by-pushing-image)* — "Push the image through the hackathon
-   proxy." It will **ask for your Meesho email** — give it; the image is named strictly from that email.
+   proxy." It will **ask for your Meesho email** if local memory does not already have it; the image
+   is named from the email-derived team ID with a timestamp tag.
 10. **Final check** *(hackathon-submission-check)* — "Is my project ready to submit?"
 
 Steps **2–6 are the build loop** you repeat while developing; **7–10 are the wrap-up** at the end.
@@ -221,10 +222,12 @@ mkdir -p data && docker run --rm -p 9080:9080 -p 8090:8090 -v "$(pwd)/data:/app/
 
 > *"Upload the image through the hackathon proxy for the judges."*
 
-`hackathon-deploy-by-pushing-image` asks for the organizer proxy URL, login username, token, and
-**Priya's Meesho organization email** (`priya.sharma@meesho.com`). It checks that the image runs
-locally, tags it strictly from that email — `priya.sharma` as both the folder and image name —
-pushes it through the proxy, and prints the final image URL the judges will pull.
+`hackathon-deploy-by-pushing-image` asks for the organizer token and, if local memory does not
+already have it, **Priya's Meesho organization email** (`priya.sharma@meesho.com`). It checks that
+the image runs locally, derives the team ID `priya-sharma`, tags the image as
+`registry.buildathon.meesho.dev/priya-sharma:20260701-053012`, pushes it through the proxy, records
+the non-secret push metadata in local `.agent-memory/`, and prints the final image URL the judges
+will pull. The token is never stored.
 
 ### Step 10 — Final readiness check
 

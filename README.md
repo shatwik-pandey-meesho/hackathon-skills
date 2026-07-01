@@ -28,8 +28,10 @@ excluded) and tells the participant to upload that single file to the organizer'
 submission folder themselves.
 
 Separately, when pushing the judging image, `hackathon-deploy-by-pushing-image` **always asks for
-the participant's Meesho organization email** and uses it strictly to name the image
-(`PROXY_HOST/<name-before-@>/<name-before-@>:TAG`).
+the participant's Meesho organization email** unless it is already in local `.agent-memory/`, then
+uses the email-derived team ID to name the image (`registry.buildathon.meesho.dev/TEAM_ID:TIMESTAMP`).
+The team ID is the lowercase email prefix with non `a-z`, `0-9`, `_`, or `-` characters collapsed
+to hyphens, so `priya.sharma@meesho.com` becomes `priya-sharma`.
 
 ## Skills
 

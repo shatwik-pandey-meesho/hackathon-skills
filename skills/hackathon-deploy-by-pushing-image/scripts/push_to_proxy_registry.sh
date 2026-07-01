@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROXY_HOST=""
+PROXY_HOST="registry.buildathon.meesho.dev"
 LOGIN_USER="hackathon"
 TOKEN=""
 LOCAL_IMAGE=""
 USER_SLUG=""
-TAG="final"
+TAG=""
 FRONTEND_PORT="${FRONTEND_PORT:-9080}"
 BACKEND_PORT="${BACKEND_PORT:-8090}"
 DATA_DIR="${DATA_DIR:-}"
@@ -14,38 +14,34 @@ SKIP_SMOKE="false"
 
 usage() {
   cat <<'USAGE'
-Usage: push_to_proxy_registry.sh --proxy-host HOST --token TOKEN --local-image IMAGE [options]
+Usage: push_to_proxy_registry.sh --token TOKEN --local-image IMAGE [options]
 
 Logs in to a token-authenticated Docker proxy, verifies the local image starts,
-tags it as HOST/USER/USER:TAG, and pushes it.
+tags it as HOST/TEAM_ID:TAG, and pushes it.
 
 Required:
-  --proxy-host HOST       Proxy registry host, for example hackathon-proxy-xxxxx.run.app
   --token TOKEN           Registry token or password. Can also use HACKATHON_PROXY_TOKEN.
   --local-image IMAGE     Existing local image to push, for example hackathon-app:final
-  --user SLUG             Identity slug for the image path. Pass the part of the participant's
-                          Meesho email before @ (for example priya.sharma). A full email is
-                          accepted and the part before @ is used. Can also use MEESHO_EMAIL.
+  --user EMAIL            Participant's Meesho email. Can also use MEESHO_EMAIL.
 
 Options:
+  --proxy-host HOST       Proxy registry host. Default: registry.buildathon.meesho.dev
   --login-user USER       Docker login username. Default: hackathon
-  --tag TAG               Final image tag. Default: final
+  --tag TAG               Final image tag. Default: UTC timestamp, e.g. 20260701-053012
   --data-dir DIR          Optional host data dir to mount to /app/data during smoke test.
                           Final images should normally pass without this.
   --skip-smoke            Skip local container health check. Use only if already checked.
   -h, --help              Show this help text.
 
 Final image URL:
-  HOST/USER/USER:TAG
+  HOST/TEAM_ID:TAG
 
 Example:
   HACKATHON_PROXY_TOKEN=hackathon2026 \
     ./scripts/push_to_proxy_registry.sh \
-      --proxy-host hackathon-proxy-xxxxx.run.app \
       --login-user hackathon \
       --local-image hackathon-app:final \
-      --user priya.sharma \
-      --tag v1
+      --user priya.sharma@meesho.com
 USAGE
 }
 
@@ -103,11 +99,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "$TOKEN" ]] || TOKEN="${HACKATHON_PROXY_TOKEN:-}"
-[[ -n "$PROXY_HOST" ]] || fail "--proxy-host is required."
 [[ -n "$TOKEN" ]] || fail "--token is required, or set HACKATHON_PROXY_TOKEN."
 [[ -n "$LOCAL_IMAGE" ]] || fail "--local-image is required."
 [[ -n "$LOGIN_USER" ]] || fail "--login-user cannot be empty."
-[[ -n "$TAG" ]] || fail "--tag cannot be empty."
+[[ -n "$TAG" ]] || TAG="$(date -u +%Y%m%d-%H%M%S)"
 
 need_cmd docker || fail "Docker is not installed or not on PATH."
 need_cmd curl || fail "curl is required for the local health check."
@@ -120,15 +115,33 @@ PROXY_HOST="${PROXY_HOST%/}"
 [[ "$PROXY_HOST" != */* ]] || fail "--proxy-host must be only the registry host, without a path."
 
 [[ -n "$USER_SLUG" ]] || USER_SLUG="${MEESHO_EMAIL:-}"
-[[ -n "$USER_SLUG" ]] || fail "Could not determine the identity slug. Pass --user (the Meesho email name before @), or set MEESHO_EMAIL."
+if [[ -z "$USER_SLUG" && -f ".agent-memory/state.json" ]] && command -v python3 >/dev/null 2>&1; then
+  USER_SLUG="$(python3 - <<'PY'
+import json
 
-# Accept a full email and use the part before @; then lowercase for Docker.
-USER_SLUG="${USER_SLUG%%@*}"
-IMAGE_NAMESPACE="$(echo "$USER_SLUG" | tr '[:upper:]' '[:lower:]')"
-IMAGE_NAME="$IMAGE_NAMESPACE"
+try:
+    with open(".agent-memory/state.json", "r", encoding="utf-8") as fh:
+        state = json.load(fh)
+    print(state.get("participant_email") or state.get("team_id") or "")
+except Exception:
+    print("")
+PY
+)"
+fi
+[[ -n "$USER_SLUG" ]] || fail "Could not determine the participant email. Pass --user, or set MEESHO_EMAIL."
 
-if [[ ! "$IMAGE_NAMESPACE" =~ ^[a-z0-9]+([._-][a-z0-9]+)*$ ]]; then
-  fail "Identity '$USER_SLUG' becomes invalid Docker path '$IMAGE_NAMESPACE'. Pass a Docker-safe --user."
+slugify_team_id() {
+  local raw="$1"
+  local prefix="${raw%%@*}"
+  printf "%s" "$prefix" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9_-]+/-/g; s/^-+//; s/-+$//'
+}
+
+TEAM_ID="$(slugify_team_id "$USER_SLUG")"
+
+if [[ -z "$TEAM_ID" || ! "$TEAM_ID" =~ ^[a-z0-9] || ! "$TEAM_ID" =~ [a-z0-9]$ || ! "$TEAM_ID" =~ ^[a-z0-9_-]+$ ]]; then
+  fail "Email '$USER_SLUG' becomes invalid team id '$TEAM_ID'. Use a Meesho email with letters or numbers before @."
 fi
 if [[ ! "$TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
   fail "Invalid Docker tag '$TAG'. Use letters, numbers, underscores, dots, or dashes."
@@ -184,13 +197,55 @@ else
   echo "Skipping local smoke test because --skip-smoke was provided."
 fi
 
-FINAL_URL="$PROXY_HOST/$IMAGE_NAMESPACE/$IMAGE_NAME:$TAG"
+FINAL_URL="$PROXY_HOST/$TEAM_ID:$TAG"
 
 echo "Logging in to $PROXY_HOST as $LOGIN_USER"
 printf "%s" "$TOKEN" | docker login "$PROXY_HOST" --username "$LOGIN_USER" --password-stdin >/dev/null
 
 docker tag "$LOCAL_IMAGE" "$FINAL_URL"
 docker push "$FINAL_URL"
+
+update_agent_memory() {
+  local memory_dir=".agent-memory"
+  local state_path="$memory_dir/state.json"
+  [[ -f "$state_path" ]] || return 0
+
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$state_path" "$USER_SLUG" "$TEAM_ID" "$PROXY_HOST" "$LOGIN_USER" "$FINAL_URL" "$TAG" <<'PY'
+import json
+import sys
+from datetime import datetime, timezone
+
+path, email, team_id, host, login_user, final_url, tag = sys.argv[1:]
+with open(path, "r", encoding="utf-8") as fh:
+    data = json.load(fh)
+data.update({
+    "participant_email": email,
+    "team_id": team_id,
+    "registry_proxy_host": host,
+    "registry_login_user": login_user,
+    "registry_url": final_url,
+    "last_pushed_image": final_url,
+    "last_pushed_tag": tag,
+    "last_successful_step": "pushed image through registry proxy",
+    "current_status": "image pushed",
+    "current_blocker": "",
+    "next_action": "run final submission check",
+    "last_updated": datetime.now(timezone.utc).isoformat(),
+})
+with open(path, "w", encoding="utf-8") as fh:
+    json.dump(data, fh, indent=2)
+    fh.write("\n")
+PY
+  fi
+
+  {
+    printf "\n## %s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    printf "Pushed final image for team_id %s to %s.\n" "$TEAM_ID" "$FINAL_URL"
+  } >> "$memory_dir/activity.md"
+}
+
+update_agent_memory
 
 echo "Final image URL:"
 echo "$FINAL_URL"
