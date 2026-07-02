@@ -25,6 +25,7 @@ Package the whole project into one runnable image for judges. The goal is not pr
 
 ## Required Behavior
 
+- **The image must always be built for `linux/amd64`, in every case, with no exception.** Deployment (and judging) supports only amd64 Linux. Always pass `--platform linux/amd64` to `docker build` and `docker run`; `scripts/build_single_image.sh` and `.ps1` already do this and also export `DOCKER_DEFAULT_PLATFORM=linux/amd64`. This matters most on Apple Silicon (M1/M2/M3) and other ARM machines, where a default build would silently produce an arm64 image that fails on deployment. If you write build commands by hand, include `--platform linux/amd64`.
 - One image is enough to run the project.
 - **nginx serves the React build on container port `9080`** and reverse-proxies `/api/` to the backend on `127.0.0.1:8090`. The frontend calls the backend only via the relative `/api/...` path — never a hardcoded host or port — so the app works behind any randomly assigned domain or subdomain. This routing is mandatory.
 - The backend listens on container port `8090`. It may stay exposed for direct debugging, but the app's frontend→backend traffic always goes through nginx `/api`.

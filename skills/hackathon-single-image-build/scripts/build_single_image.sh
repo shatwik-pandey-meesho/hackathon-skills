@@ -45,7 +45,17 @@ check_port_available "$BACKEND_PORT" "Backend"
 mkdir -p "$DATA_DIR"
 
 echo "Building $IMAGE"
-docker build -t "$IMAGE" .
+# Deployment supports only linux/amd64. Force it so Apple Silicon / ARM hosts
+# never produce an arm64 image that fails at judging.
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker build --platform linux/amd64 -t "$IMAGE" .
+
+BUILT_ARCH="$(docker image inspect "$IMAGE" --format '{{.Os}}/{{.Architecture}}' 2>/dev/null || true)"
+if [[ "$BUILT_ARCH" != "linux/amd64" ]]; then
+  echo "Built image platform is '$BUILT_ARCH', but deployment requires 'linux/amd64'."
+  echo "Ensure Docker Desktop supports amd64 emulation and retry."
+  exit 1
+fi
+echo "Verified image platform: linux/amd64"
 
 cleanup() {
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
@@ -53,7 +63,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Starting smoke test container"
-docker run -d --name "$CONTAINER" -p "$FRONTEND_PORT:9080" -p "$BACKEND_PORT:8090" -v "$DATA_DIR:/app/data" "$IMAGE" >/dev/null
+docker run -d --platform linux/amd64 --name "$CONTAINER" -p "$FRONTEND_PORT:9080" -p "$BACKEND_PORT:8090" -v "$DATA_DIR:/app/data" "$IMAGE" >/dev/null
 
 echo "Waiting for frontend on http://localhost:$FRONTEND_PORT/ and backend via nginx on http://localhost:$FRONTEND_PORT/api/health"
 for _ in $(seq 1 45); do
@@ -62,7 +72,7 @@ for _ in $(seq 1 45); do
     && curl -fsS "http://localhost:$FRONTEND_PORT/api/health" >/dev/null 2>&1; then
     echo "Frontend and backend-through-nginx (/api) checks passed."
     echo "Image ready: $IMAGE"
-    echo "Run command: docker run --rm -p 9080:9080 -p 8090:8090 -v \"\$(pwd)/data:/app/data\" $IMAGE"
+    echo "Run command: docker run --rm --platform linux/amd64 -p 9080:9080 -p 8090:8090 -v \"\$(pwd)/data:/app/data\" $IMAGE"
     exit 0
   fi
   sleep 2

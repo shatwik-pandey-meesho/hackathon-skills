@@ -2,6 +2,13 @@
 
 The final image must include everything judges need to start the project.
 
+## Target Platform (MUST FOLLOW — fixed at all cost)
+
+- The image **must always** be built and run for **`linux/amd64`**. Deployment supports only amd64 Linux; there is no exception.
+- Always pass `--platform linux/amd64` to `docker build` and `docker run`, and prefer exporting `DOCKER_DEFAULT_PLATFORM=linux/amd64` for the build.
+- On Apple Silicon (M1/M2/M3) or any ARM host, a default `docker build` produces an **arm64** image that starts locally but **fails on the amd64 deployment**. Forcing the platform prevents this. ARM hosts build/run amd64 under emulation, which is slower but correct.
+- To confirm what was actually produced: `docker image inspect <image> --format '{{.Os}}/{{.Architecture}}'` must print `linux/amd64`.
+
 ## Required
 
 - React production build copied into the runtime image and served by **nginx**.

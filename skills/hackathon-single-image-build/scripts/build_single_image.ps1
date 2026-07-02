@@ -44,10 +44,21 @@ New-Item -ItemType Directory -Force $DataDir | Out-Null
 
 try {
   Write-Host "Building $Image"
-  docker build -t $Image .
+  # Deployment supports only linux/amd64. Force it so ARM hosts never produce an
+  # arm64 image that fails at judging.
+  $env:DOCKER_DEFAULT_PLATFORM = "linux/amd64"
+  docker build --platform linux/amd64 -t $Image .
+
+  $builtArch = (docker image inspect $Image --format '{{.Os}}/{{.Architecture}}' 2>$null)
+  if ($builtArch -ne "linux/amd64") {
+    Write-Host "Built image platform is '$builtArch', but deployment requires 'linux/amd64'."
+    Write-Host "Ensure Docker Desktop supports amd64 emulation and retry."
+    exit 1
+  }
+  Write-Host "Verified image platform: linux/amd64"
 
   Write-Host "Starting smoke test container"
-  docker run -d --name $container -p "${FrontendPort}:9080" -p "${BackendPort}:8090" -v "${DataDir}:/app/data" $Image | Out-Null
+  docker run -d --platform linux/amd64 --name $container -p "${FrontendPort}:9080" -p "${BackendPort}:8090" -v "${DataDir}:/app/data" $Image | Out-Null
 
   Write-Host "Waiting for frontend on http://localhost:$FrontendPort/ and backend via nginx on http://localhost:$FrontendPort/api/health"
   for ($i = 0; $i -lt 45; $i++) {
@@ -56,7 +67,7 @@ try {
       curl.exe -fsS "http://localhost:$FrontendPort/api/health" | Out-Null
       Write-Host "Frontend and backend-through-nginx (/api) checks passed."
       Write-Host "Image ready: $Image"
-      Write-Host "Run command: docker run --rm -p 9080:9080 -p 8090:8090 -v ${PWD}/data:/app/data $Image"
+      Write-Host "Run command: docker run --rm --platform linux/amd64 -p 9080:9080 -p 8090:8090 -v ${PWD}/data:/app/data $Image"
       exit 0
     } catch {
       Start-Sleep -Seconds 2
